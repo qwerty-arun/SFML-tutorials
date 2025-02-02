@@ -1,13 +1,14 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/WindowStyle.hpp>
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(400, 400), "Bouncing Ball");
+    sf::RenderWindow window(sf::VideoMode(400, 400), "Bouncing Ball",sf::Style::Close|sf::Style::Resize);
 
     sf::CircleShape ball(20.f);
     ball.setFillColor(sf::Color::Blue);
     ball.setPosition(200.f, 200.f);
 
-    sf::Vector2f velocity(3.f, 2.f);  // Speed in x and y directions
+    sf::Vector2f velocity(3.0f, 2.0f);  // Speed in x and y directions
 
     while (window.isOpen()) {
         sf::Event event;
