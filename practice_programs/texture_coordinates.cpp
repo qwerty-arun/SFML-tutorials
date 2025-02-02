@@ -9,8 +9,6 @@
 #include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Window/WindowStyle.hpp>
-#include "animation.h"
-#include <ctime>
 #include <iostream>
 
 int main()
@@ -22,13 +20,14 @@ int main()
     sf::Texture playerTexture; //defining a texture
     playerTexture.loadFromFile("diff_imposters.png"); // there are 12 diff imposters 4x3 
     player.setTexture(&playerTexture); 
+    sf::Vector2u textureSize = playerTexture.getSize();
+    textureSize.x/=3; //three columns, note that this is the width of one imposter
+    textureSize.y/=4; //four rows, height of one imposter
 
-    Animation animation(&playerTexture,sf::Vector2u(3,4),0.3f);
-    float deltaTime = 0.0f;
-    sf::Clock clock;
+    //now we need to select the imposter what I want: the bottom right one (red with chef hat)
+        player.setTextureRect(sf::IntRect(textureSize.x * 2,  textureSize.y * 3,textureSize.x,textureSize.y)); //2 and 3 are just offsets, last two parameters are just height and width of one imposter
     while(window.isOpen())
     {
-        deltaTime=clock.restart().asSeconds();
         sf::Event evnt;
         while(window.pollEvent(evnt))
         {
@@ -39,10 +38,7 @@ int main()
                     break;
             }
         }
-
-        animation.Update(0,deltaTime);
-        player.setTextureRect(animation.uvRect);
-        window.clear(sf::Color(150,150,150));
+        window.clear();
         window.draw(player);
         window.display();
     }
