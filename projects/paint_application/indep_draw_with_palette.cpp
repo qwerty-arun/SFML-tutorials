@@ -13,7 +13,6 @@
 int main() {
     sf::RenderWindow window(sf::VideoMode(500, 500), "Smooth Paint App",sf::Style::Resize|sf::Style::Close);
 
-    sf::VertexArray lines(sf::LineStrip); // Stores the line segments
     sf::Color currentColor = sf::Color::Black;  // Default color
 
     std::vector<sf::VertexArray> strokes; //stores multiple independent strokes
@@ -33,14 +32,6 @@ int main() {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-            // Change color on keypress
-            /*if (event.type == sf::Event::KeyPressed) {*/
-            /*    if (event.key.code == sf::Keyboard::R) currentColor = sf::Color::Red;*/
-            /*    if (event.key.code == sf::Keyboard::G) currentColor = sf::Color::Green;*/
-            /*    if (event.key.code == sf::Keyboard::B) currentColor = sf::Color::Blue;*/
-            /*    if (event.key.code == sf::Keyboard::Y) currentColor = sf::Color::Yellow;*/
-            /*    if (event.key.code == sf::Keyboard::K) currentColor = sf::Color::Black;*/
-            /*}*/
                     if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) // use if(event.mouseButton.button == sf::Mouse::Left) if you want only lines
                     {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
@@ -65,7 +56,6 @@ int main() {
                         {
                             currentColor=sf::Color::Black;
                         }
-                    /*lines.append(sf::Vertex(sf::Vector2f(mousePos), currentColor));*/
                     }
 
                     if(event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
@@ -73,7 +63,6 @@ int main() {
                         currentStroke = sf::VertexArray(sf::LineStrip); //reset stroke
                         isDrawing=true;
                     }
-                    
                     if(event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
                     {
                         if(currentStroke.getVertexCount()>1)
@@ -82,7 +71,6 @@ int main() {
                         }
                          isDrawing= false;
                     }
-
             }
 
         if(isDrawing)
@@ -90,21 +78,11 @@ int main() {
             sf::Vector2i mousePos = sf::Mouse::getPosition(window);
             currentStroke.append(sf::Vertex(sf::Vector2f(mousePos),currentColor));
         }
-
-        // Draw only when the left mouse button is held
-        /*if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {*/
-        /*    sf::Vector2i mousePos = sf::Mouse::getPosition(window);*/
-        /*    lines.append(sf::Vertex(sf::Vector2f(mousePos), currentColor));*/
-        /*}*/
-
         window.clear(sf::Color::White);
-        /*window.draw(lines);  // Draw the smooth line*/
-        //draw all previous strokes
         for(auto& stroke : strokes)
         {
             window.draw((stroke));
         }
-
         //draw the current stroke while the user is still drawing
         if(isDrawing)
         {
