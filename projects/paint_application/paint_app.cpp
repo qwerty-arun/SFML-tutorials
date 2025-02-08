@@ -1,178 +1,128 @@
-// the eraser featue doesn't work correctly
+// Features: independent drawings (freehand), color palette for selecting colors, clear button to erase everything
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/PrimitiveType.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Vertex.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/WindowStyle.hpp>
 #include <vector>
 #include <cmath>
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(500, 500), "Smooth Paint App",sf::Style::Resize|sf::Style::Close);
-    sf::VertexArray lines(sf::LineStrip); // Stores the line segments
-    sf::Color currentColor = sf::Color::Black;  // Default color
-    std::vector<sf::VertexArray> strokes; //stores multiple independent strokes
-    sf::VertexArray currentStroke(sf::LineStrip);// stores the current stroke
-    bool isDrawing = false; //flag to check if the mouse is pressed
-    // Below is the color palette displayed on the right of the window
-    sf::RectangleShape red; red.setSize(sf::Vector2f(40.0f,40.0f)); red.setFillColor(sf::Color::Red); red.setPosition(sf::Vector2f(460.0f,0.0f));
-    sf::RectangleShape blue;blue.setSize(sf::Vector2f(40.0f,40.0f));blue.setFillColor(sf::Color::Blue);blue.setPosition(sf::Vector2f(460.0f,40.0f));
-    sf::RectangleShape yellow;yellow.setSize(sf::Vector2f(40.0f,40.0f));yellow.setFillColor(sf::Color::Yellow);yellow.setPosition(sf::Vector2f(460.0f,80.0f));
-    sf::RectangleShape green;green.setSize(sf::Vector2f(40.0f,40.0f));green.setFillColor(sf::Color::Green);green.setPosition(sf::Vector2f(460.0f,120.0f));
-    sf::RectangleShape black;black.setSize(sf::Vector2f(40.0f,40.0f));black.setFillColor(sf::Color::Black);black.setPosition(sf::Vector2f(460.0f,160.0f));
+    sf::RenderWindow window(sf::VideoMode(500, 500), "Smooth Paint App", sf::Style::Resize | sf::Style::Close);
+    
+    std::vector<sf::VertexArray> strokes; // Stores all the drawn strokes
+    sf::VertexArray currentStroke(sf::LineStrip); // Stores the current stroke
+    sf::Color currentColor = sf::Color::Black; // Default color
 
-    sf::RectangleShape clear_box;clear_box.setSize(sf::Vector2f(40.0f,40.0f));clear_box.setFillColor(sf::Color(128.0f,128.f,128.0f)); clear_box.setPosition(sf::Vector2f(0.f,0.f));
-    sf::RectangleShape eraser_box;eraser_box.setSize(sf::Vector2f(40.0f,40.0f));eraser_box.setFillColor(sf::Color(51.0f,51.f,22.0f)); eraser_box.setPosition(sf::Vector2f(40.f,0.f));
-    bool clear_on = false;
-    bool eraser_on = false;
+    bool isDrawing = false; // Flag for drawing
+    bool eraserOn = false;  // Flag for eraser mode
+
+    // Color Palette
+    sf::RectangleShape colorPalette[5];
+    sf::Color colors[5] = { sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green, sf::Color::Black };
+    
+    for (int i = 0; i < 5; i++) {
+        colorPalette[i].setSize(sf::Vector2f(40.0f, 40.0f));
+        colorPalette[i].setFillColor(colors[i]);
+        colorPalette[i].setPosition(460.0f, i * 40.0f);
+    }
+
+    // Clear Button
+    sf::RectangleShape clearBox;
+    clearBox.setSize(sf::Vector2f(40.0f, 40.0f));
+    clearBox.setFillColor(sf::Color(128, 128, 128)); // Gray
+    clearBox.setPosition(0.f, 0.f);
+
+    // Eraser Button
+    sf::RectangleShape eraserBox;
+    eraserBox.setSize(sf::Vector2f(40.0f, 40.0f));
+    eraserBox.setFillColor(sf::Color(200, 200, 200)); // Light Gray
+    eraserBox.setPosition(40.f, 0.f);
 
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-                    if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) // use if(event.mouseButton.button == sf::Mouse::Left) if you want only lines
-                    {
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                        /*sf::Vector2f mousePos(event.mouseButton.x,event.mouseButton.y);*/
-                        if(red.getGlobalBounds().contains((sf::Vector2f)mousePos)) //note that type casting is happening from into to float so its not a problem as there is not info loss
-                        {
-                            currentColor=sf::Color::Red;
-                        }
-                        if(blue.getGlobalBounds().contains((sf::Vector2f)mousePos))
-                        {
-                            currentColor=sf::Color::Blue;
-                        }
-                        if(yellow.getGlobalBounds().contains((sf::Vector2f)mousePos))
-                        {
-                            currentColor=sf::Color::Yellow;
-                        }
-                        if(green.getGlobalBounds().contains((sf::Vector2f)mousePos))
-                        {
-                            currentColor=sf::Color::Green;
-                        }
-                        if(black.getGlobalBounds().contains((sf::Vector2f)mousePos))
-                        {
-                            currentColor=sf::Color::Black;
-                        }
-                        if(clear_box.getGlobalBounds().contains((sf::Vector2f)mousePos))
-                        {
-                           clear_on = true;
-                        }
-                        if(eraser_box.getGlobalBounds().contains((sf::Vector2f)mousePos))
-                        {
-                           eraser_on = true;
-                        }
-                    }
 
-                    if(event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-                    {
-                        currentStroke = sf::VertexArray(sf::LineStrip); //reset stroke
-                        isDrawing=true;
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+
+                // Check if a color button is clicked
+                for (int i = 0; i < 5; i++) {
+                    if (colorPalette[i].getGlobalBounds().contains(mousePosF)) {
+                        currentColor = colors[i];
+                        eraserOn = false; // Turn off eraser mode
                     }
-                    
-                    if(event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
-                    {
-                        if(currentStroke.getVertexCount()>1)
-                        {
-                            strokes.push_back(currentStroke);
-                        }
-                         isDrawing= false;
-                    }
+                }
+
+                // Check if the clear button is clicked
+                if (clearBox.getGlobalBounds().contains(mousePosF)) {
+                    strokes.clear();
+                    eraserOn = false;
+                }
+
+                // Check if the eraser button is clicked
+                if (eraserBox.getGlobalBounds().contains(mousePosF)) {
+                    eraserOn = true;
+                }
+
+                // Start a new stroke if drawing mode is active
+                if (!eraserOn) {
+                    currentStroke = sf::VertexArray(sf::LineStrip);
+                    isDrawing = true;
+                }
             }
-        if(isDrawing && !eraser_on)
-        {
+
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+                if (isDrawing && currentStroke.getVertexCount() > 1) {
+                    strokes.push_back(currentStroke);
+                }
+                isDrawing = false;
+            }
+        }
+
+        // Drawing logic
+        if (isDrawing && !eraserOn) {
             sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-            currentStroke.append(sf::Vertex(sf::Vector2f(mousePos),currentColor));
+            currentStroke.append(sf::Vertex(sf::Vector2f(mousePos), currentColor));
         }
-                    if(clear_on)
-                    {
-                        /*strokes.erase(sf::Mouse::getPosition(window));*/
-                        strokes.clear();
-                        clear_on=false;
-                    }
-                    
-                    /*if(eraser_on)*/
-                    /*{*/
-                    /*    sf::Vector2i mousePos = sf::Mouse::getPosition(window);*/
-                    /*    sf::VertexArray toBeErasedStroke(sf::LineStrip);// stores the current stroke*/
-                    /*    toBeErasedStroke.append(sf::Vertex(sf::Vector2f(mousePos),currentColor));*/
-                    /*    strokes.erase(sf::Vertex(sf::Vector2f(mousePos),sf::Color::White),sf::Vertex(sf::Vector2f(mousePos)+1.f,sf::Color::White));*/
-                    /*    eraser_on = false;*/
-                    /*}*/
-/*if (eraser_on) {*/
-/*            if(event.type==sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)*/
-/*            {*/
-/*    sf::Vector2i mousePos = sf::Mouse::getPosition(window);*/
-/*    sf::Vector2f eraserPosition(mousePos.x, mousePos.y);*/
-/*    float eraserRadius = 10.0f; // Eraser size*/
-/**/
-/*    // Iterate through all stored strokes*/
-/*    for (auto& stroke : strokes) {*/
-/*        for (size_t i = 0; i < stroke.getVertexCount(); ++i) {*/
-/*            sf::Vector2f point = stroke[i].position;*/
-/**/
-/*            // Check if the point is inside the eraser radius*/
-/*            if (std::hypot(point.x - eraserPosition.x, point.y - eraserPosition.y) < eraserRadius) {*/
-/*                // Remove the point by shifting remaining points*/
-/*                stroke[i].color = sf::Color::White; // Change color to background instead of removing*/
-/*            }*/
-/*        }*/
-/*    }*/
-/*        if(event.type == event.MouseButtonReleased)*/
-/*        {*/
-/*            eraser_on = false;*/
-/*        }*/
-/*    }*/
-/*}*/
-        /*else{*/
-        /*    eraser_on = false;*/
-        /*}*/
-        if (eraser_on && sf::Mouse::isButtonPressed(sf::Mouse::Left)) { 
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    sf::Vector2f eraserPosition(mousePos.x, mousePos.y);
-    float eraserRadius = 10.0f; // Eraser size
 
-    // Iterate through all stored strokes
-    for (auto& stroke : strokes) {
-        for (size_t i = 0; i < stroke.getVertexCount(); ++i) {
-            sf::Vector2f point = stroke[i].position;
-            
-            // Check if the point is inside the eraser radius
-            if (std::hypot(point.x - eraserPosition.x, point.y - eraserPosition.y) < eraserRadius) {
-                stroke[i].color = sf::Color::White; // "Erase" by turning white
+        // Eraser logic
+        if (eraserOn && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            sf::Vector2f eraserPos(mousePos.x, mousePos.y);
+            float eraserRadius = 10.0f;
+
+            for (auto& stroke : strokes) {
+                for (size_t i = 0; i < stroke.getVertexCount(); ++i) {
+                    sf::Vector2f point = stroke[i].position;
+                    if (std::hypot(point.x - eraserPos.x, point.y - eraserPos.y) < eraserRadius) {
+                        stroke[i].color = sf::Color::White; // "Erase" by changing color to background
+                    }
+                }
             }
         }
-    }
-} else {
-    eraser_on = false; // Disable eraser mode once mouse is released
-}
 
+        // Rendering
         window.clear(sf::Color::White);
-        //draw all previous strokes
-        for(auto& stroke : strokes)
-        {
-            window.draw((stroke));
+
+        // Draw all previous strokes
+        for (const auto& stroke : strokes) {
+            window.draw(stroke);
         }
-        //draw the current stroke while the user is still drawing
-        if(isDrawing)
-        {
+
+        // Draw the current stroke
+        if (isDrawing) {
             window.draw(currentStroke);
         }
-        window.draw(red);
-        window.draw(blue);
-        window.draw(yellow);
-        window.draw(green);
-        window.draw(black);
-        window.draw(clear_box);
-        window.draw(eraser_box);
+
+        // Draw UI elements
+        for (const auto& colorBox : colorPalette) {
+            window.draw(colorBox);
+        }
+        window.draw(clearBox);
+        window.draw(eraserBox);
+
         window.display();
     }
+
     return 0;
 }
