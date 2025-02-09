@@ -3,7 +3,7 @@
 #include <cmath>
 
 const float PI = 3.14159265358979323846;
-const int HARMONICS =50; // Number of odd harmonics to include
+const int HARMONICS = 15; // Number of odd harmonics to include
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 500), "Square Wave Approximation", sf::Style::Close);
@@ -19,28 +19,28 @@ int main() {
     float amplitude = 40.0f; // Adjust amplitude of the wave
     float frequency = 1.0f;  // Base frequency of the sine wave
 
-    // Generate the fundamental sine wave
+    // Generate the fundamental sine wave and draw, not used for calculation
     for (float i = 0.0f; i <= 19.0f; i += 0.01f) {
         float y = amplitude * sin(frequency * i);
         fundamentalWave.push_back(sf::Vertex(sf::Vector2f(20 * i + offset_1.x, -y + offset_1.y), sf::Color::Yellow));
     }
 
-    // Generate harmonic waves
+    // Generate harmonic waves and draw, not used for calculation
     harmonics.resize(HARMONICS);
-    for (int h = 1, n = 1; h <= HARMONICS; h++, n += 1) { //all harmonics
+    for (int h = 1, n = 1; h <= HARMONICS; h++, n += 2) { // Only odd harmonics
         for (float i = 0.0f; i <= 19.0f; i += 0.01f) {
             float y = (amplitude * sin(n * frequency * i)) / n; // Harmonic component
             harmonics[h - 1].push_back(sf::Vertex(sf::Vector2f(20 * i + offset_2.x, -y + offset_2.y), sf::Color::Red));
         }
     }
 
-    // Generate the triangular wave approximation by summing harmonics
+    // Generate the square wave approximation by summing harmonics
     for (float i = 0.0f; i <= 19.0f; i += 0.01f) {
         float y = 0.0f;
-        for (int h = 1, n = 1; h <= HARMONICS; h++, n += 1) {
-            y += std::pow(-1,n+1)*(amplitude * sin(n * frequency * i)) / n; // Sum odd harmonics
+        for (int h = 1, n = 1; h <= HARMONICS; h++, n += 2) {
+            y += (amplitude * sin(n * frequency * i)) / n; // Sum odd harmonics
         }
-        y = (2 / PI) * y; // Scaling factor for square wave
+        y = (4 / PI) * y; // Scaling factor for square wave
         squareWave.push_back(sf::Vertex(sf::Vector2f(20 * i + offset_3.x, -y + offset_3.y), sf::Color::Green));
     }
 

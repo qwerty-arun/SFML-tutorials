@@ -15,7 +15,7 @@ int main() {
 
     // Generate first sine wave
     for (float i = 0.0f; i <= 19.f; i += 0.01f) {
-        graph1Stroke.push_back(sf::Vertex(sf::Vector2f(20 * i + offset_1.x, -5 *i + offset_1.y), sf::Color::Yellow));
+        graph1Stroke.push_back(sf::Vertex(sf::Vector2f(20 * i + offset_1.x, -20 * sin(1 * i) + offset_1.y), sf::Color::Yellow));
     }
 
     // Generate second sine wave

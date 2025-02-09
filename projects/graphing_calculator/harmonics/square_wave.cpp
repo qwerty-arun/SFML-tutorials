@@ -3,7 +3,7 @@
 #include <cmath>
 
 const float PI = 3.14159265358979323846;
-const int HARMONICS = 5; // Number of odd harmonics to include
+const int HARMONICS = 15; // Number of odd harmonics to include
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 500), "Square Wave Approximation", sf::Style::Close);
@@ -19,13 +19,13 @@ int main() {
     float amplitude = 40.0f; // Adjust amplitude of the wave
     float frequency = 1.0f;  // Base frequency of the sine wave
 
-    // Generate the fundamental sine wave
+    // Generate the fundamental sine wave and draw, not used for calculation
     for (float i = 0.0f; i <= 19.0f; i += 0.01f) {
         float y = amplitude * sin(frequency * i);
         fundamentalWave.push_back(sf::Vertex(sf::Vector2f(20 * i + offset_1.x, -y + offset_1.y), sf::Color::Yellow));
     }
 
-    // Generate harmonic waves
+    // Generate harmonic waves and draw, not used for calculation
     harmonics.resize(HARMONICS);
     for (int h = 1, n = 1; h <= HARMONICS; h++, n += 2) { // Only odd harmonics
         for (float i = 0.0f; i <= 19.0f; i += 0.01f) {

@@ -1,35 +1,48 @@
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/ConvexShape.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <iostream>
-int main()
-{
-    sf::RenderWindow window(sf::VideoMode(512,512),"Arun's first trial",sf::Style::Resize|sf::Style::Close);
-    window.setFramerateLimit(60);
-    sf::CircleShape shape(50.0f,3);
-    shape.setFillColor(sf::Color(150, 50, 250));
+#include <cmath>
 
-// set a 10-pixel wide orange outline
-shape.setOutlineThickness(10.f);
-shape.setOutlineColor(sf::Color(250, 150, 100));
-    shape.setPosition(sf::Vector2f(100.f,100.f));
-    while(window.isOpen())
-    {
-        sf::Event evnt;
-        while(window.pollEvent(evnt))
-        {
-            switch(evnt.type)
-            {
-                case evnt.Closed:
-                    window.close();
-                    break;
-            }
+// Function to create a thick line using Quads
+sf::VertexArray createThickLine(sf::Vector2f start, sf::Vector2f end, float thickness, sf::Color color) {
+    sf::VertexArray quad(sf::Quads, 4);
+
+    sf::Vector2f direction = end - start; // Direction vector
+    sf::Vector2f unitDir = direction / std::sqrt(direction.x * direction.x + direction.y * direction.y); // Normalize
+    sf::Vector2f normal(-unitDir.y, unitDir.x); // Perpendicular to direction
+
+    // Scale normal by half the thickness
+    normal *= thickness / 2.0f;
+
+    // Define the four corners of the quad
+    quad[0].position = start + normal;
+    quad[1].position = start - normal;
+    quad[2].position = end - normal;
+    quad[3].position = end + normal;
+
+    // Set color
+    for (int i = 0; i < 4; ++i)
+        quad[i].color = color;
+
+    return quad;
+}
+
+int main() {
+    sf::RenderWindow window(sf::VideoMode(600, 400), "Thick Line");
+
+    // Create a thick line
+    sf::VertexArray thickLine = createThickLine({100, 200}, {500, 300}, 10.0f, sf::Color::Red);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
         }
+
         window.clear();
-        window.draw(shape);
+        window.draw(thickLine); // Draw thick line
         window.display();
     }
+
     return 0;
 }
+
