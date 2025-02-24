@@ -22,35 +22,35 @@ int main() {
     ship.setOrigin(35,35);
     ship.setPosition(100,100);
 
-    sf::Texture backgroundTexture;
-    if (!backgroundTexture.loadFromFile("/home/jarvis/work/SFML-tutorials/projects/space_shooter/space_background.jpeg")) {
-        std::cout<< "Failed to load background image!" << std::endl;
-        return -1; // Exit if loading fails
-    }
-
-    // Create sprite and set the texture
-    sf::Sprite backgroundSprite;
-    backgroundSprite.setTexture(backgroundTexture);
-
-    // Scale the image to fit the window (Optional)
-    sf::Vector2u windowSize = window.getSize();
-    sf::Vector2u textureSize = backgroundTexture.getSize();
-    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
-    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
-    backgroundSprite.setScale(scaleX, scaleY);
+    /*sf::Texture backgroundTexture;*/
+    /*if (!backgroundTexture.loadFromFile("/home/jarvis/work/SFML-tutorials/projects/space_shooter/space_background.jpeg")) {*/
+    /*    std::cout<< "Failed to load background image!" << std::endl;*/
+    /*    return -1; // Exit if loading fails*/
+    /*}*/
+    /**/
+    /*// Create sprite and set the texture*/
+    /*sf::Sprite backgroundSprite;*/
+    /*backgroundSprite.setTexture(backgroundTexture);*/
+    /**/
+    /*// Scale the image to fit the window (Optional)*/
+    /*sf::Vector2u windowSize = window.getSize();*/
+    /*sf::Vector2u textureSize = backgroundTexture.getSize();*/
+    /*float scaleX = static_cast<float>(windowSize.x) / textureSize.x;*/
+    /*float scaleY = static_cast<float>(windowSize.y) / textureSize.y;*/
+    /*backgroundSprite.setScale(scaleX, scaleY);*/
     // create an empty shape
-sf::ConvexShape convex;
-
-// resize it to 5 points
-convex.setPointCount(5);
-
-// define the points
-convex.setPoint(0, {0.f, 0.f});
-convex.setPoint(1, {150.f, 10.f});
-convex.setPoint(2, {120.f, 90.f});
-convex.setPoint(3, {30.f, 100.f});
-convex.setPoint(4, {0.f, 50.f});
-    convex.setFillColor(sf::Color::Blue);
+/*sf::ConvexShape convex;*/
+/**/
+/*// resize it to 5 points*/
+/*convex.setPointCount(5);*/
+/**/
+/*// define the points*/
+/*convex.setPoint(0, {0.f, 0.f});*/
+/*convex.setPoint(1, {150.f, 10.f});*/
+/*convex.setPoint(2, {120.f, 90.f});*/
+/*convex.setPoint(3, {30.f, 100.f});*/
+/*convex.setPoint(4, {0.f, 50.f});*/
+/*    convex.setFillColor(sf::Color::Blue);*/
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -110,7 +110,6 @@ convex.setPoint(4, {0.f, 50.f});
             }
         window.clear(sf::Color::Black);
 	window.draw(ship);
-        window.draw(backgroundSprite);
 	/*window.draw(convex);*/
         window.display();
     }
