@@ -2,6 +2,7 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -10,6 +11,13 @@
 #include <cmath>
 #include <iostream>
 
+void drawBullet(sf::RenderWindow *window,sf::RectangleShape* bullet, sf::Vector2f position)
+{
+                    bullet->setFillColor(sf::Color::Red);
+                    bullet->setPosition(position);
+                    bullet->setSize(sf::Vector2f(10.0f,10.0f));
+                        window->draw(*bullet);
+}
 int main() {
     sf::RenderWindow window(sf::VideoMode(500, 500), "Asteroid game",sf::Style::Resize|sf::Style::Close);
     sf::CircleShape ship(35,3);
@@ -22,35 +30,6 @@ int main() {
     ship.setOrigin(35,35);
     ship.setPosition(100,100);
 
-    /*sf::Texture backgroundTexture;*/
-    /*if (!backgroundTexture.loadFromFile("/home/jarvis/work/SFML-tutorials/projects/space_shooter/space_background.jpeg")) {*/
-    /*    std::cout<< "Failed to load background image!" << std::endl;*/
-    /*    return -1; // Exit if loading fails*/
-    /*}*/
-    /**/
-    /*// Create sprite and set the texture*/
-    /*sf::Sprite backgroundSprite;*/
-    /*backgroundSprite.setTexture(backgroundTexture);*/
-    /**/
-    /*// Scale the image to fit the window (Optional)*/
-    /*sf::Vector2u windowSize = window.getSize();*/
-    /*sf::Vector2u textureSize = backgroundTexture.getSize();*/
-    /*float scaleX = static_cast<float>(windowSize.x) / textureSize.x;*/
-    /*float scaleY = static_cast<float>(windowSize.y) / textureSize.y;*/
-    /*backgroundSprite.setScale(scaleX, scaleY);*/
-    // create an empty shape
-/*sf::ConvexShape convex;*/
-/**/
-/*// resize it to 5 points*/
-/*convex.setPointCount(5);*/
-/**/
-/*// define the points*/
-/*convex.setPoint(0, {0.f, 0.f});*/
-/*convex.setPoint(1, {150.f, 10.f});*/
-/*convex.setPoint(2, {120.f, 90.f});*/
-/*convex.setPoint(3, {30.f, 100.f});*/
-/*convex.setPoint(4, {0.f, 50.f});*/
-/*    convex.setFillColor(sf::Color::Blue);*/
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -59,6 +38,7 @@ int main() {
         }
         float deltaTime = clock.restart().asSeconds();
 	sf::Vector2f position = ship.getPosition();
+        sf::RectangleShape bullet;
         //boundary conditions, getting back the ship into the frame
         if(position.x >=500)
         {
@@ -105,11 +85,17 @@ int main() {
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
             {
                     //random color for now
-                    ship.setFillColor(sf::Color(rand()%256,rand()%256,rand()%256));
-                    //bullet code
+                    /*ship.setFillColor(sf::Color(rand()%256,rand()%256,rand()%256));*/
+                    sf::Vector2f spacecraft_position = ship.getPosition();
+                    bullet.setFillColor(sf::Color::Red);
+                    bullet.setPosition(position);
+                    bullet.setSize(sf::Vector2f(3.0f,3.0f));
+                    /*drawBullet(&window, &bullet, spacecraft_position);*/
             }
+        bullet.move(sf::Vector2f(2.0f,2.0f));
         window.clear(sf::Color::Black);
 	window.draw(ship);
+	window.draw(bullet);
 	/*window.draw(convex);*/
         window.display();
     }
