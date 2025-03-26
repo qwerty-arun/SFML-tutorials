@@ -1,4 +1,4 @@
-// Simple Shoot the target game with mouse and collision
+//Dodge the cat with dog
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -7,33 +7,48 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
-
+#include <algorithm>
+#include <cstddef>
+#include <cstdlib>
+#include <vector>
+#include <iostream>
 using namespace sf;
 
 
 int main() {
+    srand(time(NULL));
 
-    int keyTime = 8;
-    RenderWindow window(VideoMode(640, 500), "Simple Game");
+    RenderWindow window(VideoMode(640, 500), "Cat Do(d)ge");
     window.setFramerateLimit(60);
 
-    CircleShape hoop;
-    int dir=0;
-    hoop.setRadius(50);
-    hoop.setFillColor(Color::Black);
-    hoop.setOutlineThickness(2);
-    hoop.setOutlineColor(Color::Blue);
-    hoop.setPosition(Vector2f(0,10.0f));
+    //Cat
+    Texture catTex;
+    Sprite cat;
+
+   if(! catTex.loadFromFile("textures/cat.png"))
+        throw "Could not load cat.png!";
+
+    cat.setTexture(catTex);
+    cat.setScale(Vector2f(0.5f,0.5f));
+    int catSpawnTimer = 15;
 
 
-    CircleShape ball;
-    bool isShot = false;
-    ball.setRadius(20);
-    ball.setFillColor(Color::Red);
-    ball.setPosition(Vector2f(0,window.getSize().y-ball.getRadius()*3));
+    std::vector<Sprite> cats;
+    cats.push_back(Sprite(cat));
+
+    //Doge
+    Texture dogeTex;
+    Sprite doge;
+
+    if(!dogeTex.loadFromFile("textures/doge.png"))
+        throw "Could not load doge.png";
+
+    doge.setTexture(dogeTex);
+    doge.setScale(Vector2f(0.3f,0.3f));
 
     while (window.isOpen()) {
         sf::Event event;
@@ -45,45 +60,39 @@ int main() {
                 window.close();
         }
 
-        //Update Hoop
-        if(hoop.getPosition().x<=0)
-            dir = 1;
-        else if(hoop.getPosition().x + 2*hoop.getRadius() >= window.getSize().x)
-            dir = 0;
-
-        if(dir == 0)
+        //update
+        //
+        //
+        //doge(player)
+        //
+        //
+        //
+        //cats(enemies)
+        //
+        for(size_t i = 0; i < cats.size(); i++)
         {
-            hoop.move(-5,0);
+            cats[i].move(-5.f,0.f);
         }
-        else
+        if(catSpawnTimer < 20)
+            catSpawnTimer++;
+
+        if(catSpawnTimer >=20)
         {
-            hoop.move(5,0);
-        }
-
-
-        //Update Ball
-        if(Mouse::isButtonPressed(Mouse::Left))
-        {
-            isShot = true;
-        }
-
-        if(!isShot)
-            ball.setPosition(Mouse::getPosition(window).x, ball.getPosition().y); //relative to the window
-        else
-            ball.move(0,-5.0f);
-
-        //Collision
-        if(ball.getPosition().y <0 || ball.getGlobalBounds().intersects(hoop.getGlobalBounds()))
-        {
-            isShot = false;
-            ball.setPosition(ball.getPosition().x,window.getSize().y-ball.getRadius()*3);
+            cat.setPosition(window.getSize().x, rand()%int(window.getSize().y - cat.getGlobalBounds().height));
+            cats.push_back(Sprite(cat));
+            catSpawnTimer= 0;
         }
 
+
+        //draw
         window.clear(Color::White);
-        window.draw(hoop);
-        window.draw(ball);
+
+        window.draw(doge);
+        for(size_t i = 0; i<cats.size();i++)
+        {
+            window.draw(cats[i]);
+        }
         window.display();
     }
-    return 0;
+return 0;
 }
-
