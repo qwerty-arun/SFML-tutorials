@@ -1,3 +1,4 @@
+//Awesome shit
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <iostream>

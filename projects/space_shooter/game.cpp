@@ -1,103 +1,138 @@
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Vertex.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <SFML/System/Clock.hpp>
-#include <SFML/Window/WindowStyle.hpp>
-#include <cmath>
+#include <SFML/Window/Keyboard.hpp>
 #include <iostream>
+#include <vector>
+#include <cmath>
 
-void drawBullet(sf::RenderWindow *window,sf::RectangleShape* bullet, sf::Vector2f position)
-{
-                    bullet->setFillColor(sf::Color::Red);
-                    bullet->setPosition(position);
-                    bullet->setSize(sf::Vector2f(10.0f,10.0f));
-                        window->draw(*bullet);
-}
+using namespace sf;
+
 int main() {
-    sf::RenderWindow window(sf::VideoMode(500, 500), "Asteroid game",sf::Style::Resize|sf::Style::Close);
-    sf::CircleShape ship(35,3);
-    sf::Clock clock;
+    // Create window
+    RenderWindow window(VideoMode(800, 600), "Asteroid Game", Style::Close | Style::Resize);
+    Clock clock;
 
-    sf::Texture shipTexture;
-    shipTexture.loadFromFile("/home/jarvis/work/SFML-tutorials/projects/space_shooter/spaceship.jpeg");
+    // Load ship texture
+    Texture shipTexture;
+    if (!shipTexture.loadFromFile("../space_shooter/spaceship.jpeg")) {
+        std::cerr << "Error: Could not load spaceship.jpeg" << std::endl;
+        return -1;
+    }
+
+    // Ship settings
+    RectangleShape ship(Vector2f(55, 55));
     ship.setTexture(&shipTexture);
-    shipTexture.setSmooth(true);
-    ship.setOrigin(35,35);
-    ship.setPosition(100,100);
+    ship.setOrigin(27.5f, 27.5f);  // Centered origin
+    ship.setPosition(400, 500);
+    ship.setRotation(0);
+
+    // Load bullet texture
+    Texture bulletTexture;
+    if (!bulletTexture.loadFromFile("../space_invaders/laserbeam.png")) {
+        std::cerr << "Error: Could not load laserbeam.png" << std::endl;
+        return -1;
+    }
+
+    struct Bullet {
+        Sprite sprite;
+        Vector2f velocity;
+    };
+
+    std::vector<Bullet> bullets;
+    int shootTimer = 0;
+
+    // Asteroids
+    std::vector<RectangleShape> asteroids;
+    int asteroidTimer = 0;
 
     while (window.isOpen()) {
-        sf::Event event;
+        // Handle events
+        Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == Event::Closed) {
                 window.close();
-        }
-        float deltaTime = clock.restart().asSeconds();
-	sf::Vector2f position = ship.getPosition();
-        sf::RectangleShape bullet;
-        //boundary conditions, getting back the ship into the frame
-        if(position.x >=500)
-        {
-            ship.setPosition(0,position.y);
-        }
-        if(position.x<=0.0)
-        {
-            ship.setPosition(500,position.y);
-        }
-        if(position.y >=500)
-        {
-            ship.setPosition(position.x,0);
-        }
-        if(position.y<=0.0)
-        {
-            ship.setPosition(position.x,500);
+            }
         }
 
-        //keyboard input
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-            {
-                    ship.move(-2.5f,0.0f);
+        float deltaTime = clock.restart().asSeconds();
+        Vector2f shipPos = ship.getPosition();
+        float shipRotation = ship.getRotation() - 90;
+        float rotationRadians = shipRotation * (3.14159265f / 180.0f);
+
+        // Ship Movement
+        if (Keyboard::isKeyPressed(Keyboard::A)) ship.move(-5.5f, 0.0f);
+        if (Keyboard::isKeyPressed(Keyboard::D)) ship.move(5.5f, 0.0f);
+        if (Keyboard::isKeyPressed(Keyboard::W)) ship.move(0.0f, -5.5f);
+        if (Keyboard::isKeyPressed(Keyboard::S)) ship.move(0.0f, 5.5f);
+        if (Keyboard::isKeyPressed(Keyboard::J)) ship.rotate(-5.f);
+        if (Keyboard::isKeyPressed(Keyboard::K)) ship.rotate(5.f);
+
+        // Screen Wrapping
+        if (shipPos.x > window.getSize().x) ship.setPosition(0, shipPos.y);
+        if (shipPos.x < 0) ship.setPosition(window.getSize().x, shipPos.y);
+        if (shipPos.y > window.getSize().y) ship.setPosition(shipPos.x, 0);
+        if (shipPos.y < 0) ship.setPosition(shipPos.x, window.getSize().y);
+
+        // Shooting bullets
+        if (shootTimer < 5) shootTimer++;
+        if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer >= 5) {
+            Bullet newBullet;
+            newBullet.sprite.setTexture(bulletTexture);
+            newBullet.sprite.setScale(0.1f, 0.5f);
+            newBullet.sprite.setRotation(shipRotation);
+            newBullet.sprite.setPosition(shipPos.x-12,shipPos.y);
+            newBullet.velocity = Vector2f(10 * cos(rotationRadians), 10 * sin(rotationRadians));
+            bullets.push_back(newBullet);
+            shootTimer = 0;
+        }
+
+        // Move bullets
+        for (size_t i = 0; i < bullets.size(); i++) {
+            bullets[i].sprite.move(bullets[i].velocity);
+
+            // Delete bullets when they leave the screen
+            Vector2f bulletPos = bullets[i].sprite.getPosition();
+            if (bulletPos.x < 0 || bulletPos.x > window.getSize().x || bulletPos.y < 0 || bulletPos.y > window.getSize().y) {
+                bullets.erase(bullets.begin() + i);
             }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-            {
-                    ship.move(2.5f,0.0f);
+        }
+
+        // Spawn asteroids
+        if (asteroidTimer < 50) asteroidTimer++;
+        if (asteroidTimer >= 50) {
+            RectangleShape newAsteroid(Vector2f(50.f, 50.f));
+            newAsteroid.setFillColor(Color::White);
+            newAsteroid.setPosition(rand() % int(window.getSize().x - newAsteroid.getSize().x), 0.f);
+            asteroids.push_back(newAsteroid);
+            asteroidTimer = 0;
+        }
+
+        // Move asteroids
+        for (size_t i = 0; i < asteroids.size(); i++) {
+            asteroids[i].move(0.f, 5.f);
+            if (asteroids[i].getPosition().y > window.getSize().y) {
+                asteroids.erase(asteroids.begin() + i);
             }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-            {
-                    ship.move(0.0f,-2.5f);
+        }
+
+        // Collision Detection (Bullets & Asteroids)
+        for (int i = bullets.size() - 1; i >= 0; --i) {
+            for (int j = asteroids.size() - 1; j >= 0; --j) {
+                if (bullets[i].sprite.getGlobalBounds().intersects(asteroids[j].getGlobalBounds())) {
+                    bullets.erase(bullets.begin() + i);
+                    asteroids.erase(asteroids.begin() + j);
+                    break;
+                }
             }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-            {
-                    ship.move(0.0f,2.5f);
-            }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J))
-            {
-                    ship.rotate(-deltaTime*200.f);
-            }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
-            {
-                    ship.rotate(deltaTime*200.f);
-            }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
-            {
-                    //random color for now
-                    /*ship.setFillColor(sf::Color(rand()%256,rand()%256,rand()%256));*/
-                    sf::Vector2f spacecraft_position = ship.getPosition();
-                    bullet.setFillColor(sf::Color::Red);
-                    bullet.setPosition(position);
-                    bullet.setSize(sf::Vector2f(3.0f,3.0f));
-                    /*drawBullet(&window, &bullet, spacecraft_position);*/
-            }
-        bullet.move(sf::Vector2f(2.0f,2.0f));
-        window.clear(sf::Color::Black);
-	window.draw(ship);
-	window.draw(bullet);
-	/*window.draw(convex);*/
+        }
+
+        // Render objects
+        window.clear(Color::Black);
+        for (const auto& asteroid : asteroids) window.draw(asteroid);
+        for (const auto& bullet : bullets) window.draw(bullet.sprite);
+        window.draw(ship);
         window.display();
     }
+
     return 0;
 }
