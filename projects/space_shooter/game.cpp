@@ -1,9 +1,14 @@
+#include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <SFML/Audio.hpp>
 
 using namespace sf;
 
@@ -11,10 +16,19 @@ int main() {
     // Create window
     RenderWindow window(VideoMode(800, 600), "Asteroid Game", Style::Close | Style::Resize);
     Clock clock;
+    
+    //Sound Effects
+    SoundBuffer buffer;
+    if(!buffer.loadFromFile("laser_gun.wav"))
+        return -1;
+
+    Sound shoot(buffer);
+    shoot.setPitch(1.5f);
+
 
     // Load ship texture
     Texture shipTexture;
-    if (!shipTexture.loadFromFile("../space_shooter/spaceship.jpeg")) {
+    if (!shipTexture.loadFromFile("spaceship.jpeg")) {
         std::cerr << "Error: Could not load spaceship.jpeg" << std::endl;
         return -1;
     }
@@ -26,9 +40,20 @@ int main() {
     ship.setPosition(400, 500);
     ship.setRotation(0);
 
+    Texture asteroidTexture;
+    if(!asteroidTexture.loadFromFile("asteroid.png"))
+    {
+        std::cerr << "Error: Could not load laserbeam.png" << std::endl;
+        return -1;
+    }
+    Sprite asteroid;
+    asteroid.setTexture(asteroidTexture);
+
+    asteroid.setScale(0.3f,0.3f);
+    /*asteroid.setPosition(100.f,100.f);*/
     // Load bullet texture
     Texture bulletTexture;
-    if (!bulletTexture.loadFromFile("../space_invaders/laserbeam.png")) {
+    if (!bulletTexture.loadFromFile("laserbeam.png")) {
         std::cerr << "Error: Could not load laserbeam.png" << std::endl;
         return -1;
     }
@@ -42,7 +67,7 @@ int main() {
     int shootTimer = 0;
 
     // Asteroids
-    std::vector<RectangleShape> asteroids;
+    std::vector<Sprite> asteroids;
     int asteroidTimer = 0;
 
     while (window.isOpen()) {
@@ -76,6 +101,7 @@ int main() {
         // Shooting bullets
         if (shootTimer < 5) shootTimer++;
         if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer >= 5) {
+            shoot.play();
             Bullet newBullet;
             newBullet.sprite.setTexture(bulletTexture);
             newBullet.sprite.setScale(0.1f, 0.5f);
@@ -100,15 +126,18 @@ int main() {
         // Spawn asteroids
         if (asteroidTimer < 50) asteroidTimer++;
         if (asteroidTimer >= 50) {
-            RectangleShape newAsteroid(Vector2f(50.f, 50.f));
-            newAsteroid.setFillColor(Color::White);
-            newAsteroid.setPosition(rand() % int(window.getSize().x - newAsteroid.getSize().x), 0.f);
-            asteroids.push_back(newAsteroid);
+            /*RectangleShape newAsteroid(Vector2f(50.f, 50.f));*/
+            /*newAsteroid.setFillColor(Color::White);*/
+            asteroid.setOrigin(20.f,20.f);
+            asteroid.setPosition(rand() % int(window.getSize().x -50), 0.f);
+            /*asteroid.setPosition(rand() % int(window.getSize().x -50), rand() % int(window.getSize().y));*/
+            asteroids.push_back(Sprite(asteroid));
             asteroidTimer = 0;
         }
 
         // Move asteroids
         for (size_t i = 0; i < asteroids.size(); i++) {
+            asteroids[i].rotate(2.f);
             asteroids[i].move(0.f, 5.f);
             if (asteroids[i].getPosition().y > window.getSize().y) {
                 asteroids.erase(asteroids.begin() + i);
