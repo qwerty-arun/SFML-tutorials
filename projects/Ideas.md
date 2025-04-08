@@ -1,0 +1,30 @@
+# My Frenzy Ideas
+- Harmonics live animation (waves slowly add up to desired wave shape. Example: Square wave)
+- Graphing calculator with grids, diff color curves, zoom in and out, hover over curve and display coordinates
+- Disappearing worm
+- Bezier Curve + Spline Recreate
+- Rigid Body Simulation
+- Soft Body Simulation
+- FFT spectrum analyzer
+- Sorting Visualizer
+- Bacteria World (Microscope) with zoom in and zoom out feature
+- Blurry Vision (use different lenses)
+- One or two online games
+- Particle simulation, extend to fluid simulation using the Navier-Stokes Equation
+- Mandelbrot Set
+- 4D Hypercube (Tesseract). If possible rotate it (animate)
+- Simulate ropes and springs
+- A Big scenery, a player, moves touch views' bounding box, view moves. How do you make infinitely repeating scenes.
+- Pull elements and place. Simulate simple circuits, show directions of current. Include DC and AC voltage sources, R, L and C devices. Build a very simple circuit simulator
+- Path Finding algorithm
+- Launch a rocket off Earth, make circular orbits, move to transfer orbit, orbit around the moon and land with proper orientation. If orientation isn't proper and it lands, display crashed and Mission Failed!
+- Airfoil Simulation for different angle of attack
+- Light Sources, Fixed objects and Shadows casting
+- Traffic simulation: Create a small city with moving cars that follow traffic rules.
+- Fireworks simulation: Diff colors and explosion patterns
+- Fractal Tree Generator
+- Convex Hull (Computational Geometry)
+- Ray Casting Algorithms
+- Voxel Rendering 
+- L-Systems: Lindenmayer systems to generate trees, plants or cities (Terrain generation for games).
+- Piano
