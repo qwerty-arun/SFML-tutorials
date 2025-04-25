@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/WindowStyle.hpp>
 #include <vector>
 #include <cmath>
 #include <limits>
@@ -122,7 +123,7 @@ public:
 
 // ---------------------------- Main ----------------------------
 int main() {
-    RenderWindow window(VideoMode(800, 800), "Raycasting with Walls", Style::Close);
+    RenderWindow window(VideoMode(800, 800), "Raycasting with Walls", Style::Close | Style::Resize);
     window.setFramerateLimit(60);
 
     Torch source;
